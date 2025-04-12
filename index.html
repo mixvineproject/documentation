@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кейс от MixVine</title>
+    <style>
+        /* Анимация для фона (Синий <-> Желтый) */
+        @keyframes blueYellowGradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Анимация для появления модального окна */
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translate(-50%, -60%) scale(0.8); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        /* Анимация для спецэффекта */
+        @keyframes specialGlow {
+            0% { box-shadow: 0 0 15px 5px rgba(255, 223, 0, 0.5); }
+            50% { box-shadow: 0 0 30px 10px rgba(255, 223, 0, 0.8); }
+            100% { box-shadow: 0 0 15px 5px rgba(255, 223, 0, 0.5); }
+        }
+
+        /* Анимация для радужного свечения */
+        @keyframes rainbowGlow {
+            0% { box-shadow: 0 0 15px 5px rgba(255, 0, 0, 0.5); } /* Красный */
+            14% { box-shadow: 0 0 15px 5px rgba(255, 165, 0, 0.5); } /* Оранжевый */
+            28% { box-shadow: 0 0 15px 5px rgba(255, 255, 0, 0.5); } /* Желтый */
+            42% { box-shadow: 0 0 15px 5px rgba(0, 255, 0, 0.5); } /* Зеленый */
+            57% { box-shadow: 0 0 15px 5px rgba(0, 0, 255, 0.5); } /* Синий */
+            71% { box-shadow: 0 0 15px 5px rgba(75, 0, 130, 0.5); } /* Индиго */
+            85% { box-shadow: 0 0 15px 5px rgba(148, 0, 211, 0.5); } /* Фиолетовый */
+            100% { box-shadow: 0 0 15px 5px rgba(255, 0, 0, 0.5); } /* Красный */
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; /* Align items to the top */
+            min-height: 100vh;
+            /* Синий - Желтый анимированный фон */
+            background: linear-gradient(-45deg, #3498db, #f1c40f, #2980b9, #f39c12);
+            background-size: 400% 400%;
+            animation: blueYellowGradientShift 15s ease infinite;
+            overflow-x: hidden;
+            color: #f0f0f0;
+            padding: 20px;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        h1 {
+            text-align: center;
+            color: #fff;
+            margin-bottom: 25px;
+            font-size: 2em;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+        }
+
+        .case-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 80vw;
+            margin-bottom: 25px;
+        }
+
+        /* Маркеры */
+        .case-marker {
+            position: absolute; top: -5px; left: 50%; transform: translateX(-50%);
+            width: 0; height: 0; border-left: 10px solid transparent;
+            border-right: 10px solid transparent; border-top: 15px solid #fff; z-index: 10;
+        }
+
+        .case-marker-line {
+            position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+            width: 3px; height: 100%; background-color: rgba(255, 255, 255, 0.5);
+            z-index: 5; box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+        }
+
+        .case-container {
+            width: 100%;
+            height: 140px;
+            overflow: hidden;
+            white-space: nowrap;
+            background-color: rgba(0, 0, 0, 0.5);
+            border: 2px solid #777;
+            border-radius: 5px;
+            position: relative;
+        }
+
+        .case-items {
+            display: inline-block;
+            height: 100%;
+            transition: transform 5s cubic-bezier(0.1, 0.6, 0.1, 1);
+        }
+
+        .case-item {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 140px;
+            height: 100%;
+            border-right: 1px solid #555;
+            text-align: center; font-size: 20px;
+            font-weight: bold; box-sizing: border-box; padding: 0 5px;
+            vertical-align: top; flex-direction: column; color: #e0e0e0;
+            background-color: #333;
+            word-break: break-word; /* Добавлено для переноса текста */
+            line-height: 1.2; /* Слегка уменьшено для компактности при переносе */
+        }
+
+        /* Rarity colors */
+        .case-item.common { background-color: #444; color: #ccc; }
+        .case-item.rare { background-color: #2980b9; color: #fff; }
+        .case-item.epic { background-color: #8e44ad; color: #fff; }
+        .case-item.legendary {
+            background-image: linear-gradient(45deg, #f1c40f, #f39c12, #e67e22);
+            color: #333; font-weight: bold;
+        }
+
+        .case-item.mythic { background-color: #e74c3c; color: #fff; } /* Красный */
+        .case-item.fantastic {
+            background-color: #9b59b6; /* Замените на подходящий цвет */
+            color: #fff;
+            animation: rainbowGlow 3s linear infinite;
+        }
+
+        button#openCaseButton {
+            background-color: #c89600; color: #333;
+            padding: 10px 20px;
+            border: none; border-radius: 5px; cursor: pointer;
+            font-size: 16px;
+            font-weight: bold; margin-bottom: 15px;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.4);
+        }
+
+        button#openCaseButton:hover:not(:disabled) { background-color: #b48a00; }
+        button#openCaseButton:active:not(:disabled) { transform: scale(0.98); }
+
+        button#openCaseButton:disabled {
+            background-color: #666; color: #bbb;
+            cursor: not-allowed; text-shadow: none;
+        }
+
+        #result { display: none; }
+
+        #instructions, #bot-link {
+            font-size: 15px;
+            color: #ddd; text-align: center;
+            max-width: 90%;
+            line-height: 1.4;
+        }
+
+        #bot-link { margin-top: 5px; }
+        #bot-link a { color: #f1c40f; text-decoration: none; font-weight: bold; }
+        #bot-link a:hover { text-decoration: underline; }
+
+        /* --- МОДАЛЬНОЕ ОКНО --- */
+        .modal {
+            display: none; position: fixed; z-index: 100;
+            left: 0; top: 0; width: 100%; height: 100%;
+            overflow: auto; background-color: rgba(0,0,0,0.7);
+        }
+
+        .modal-content {
+            position: fixed; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #e8e8e8; color: #333;
+            padding: 20px 25px;
+            border: 3px solid #888; border-radius: 10px;
+            width: 90%;
+            max-width: 450px;
+            min-height: 200px; /* Увеличена высота */
+            text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+            animation: modalFadeIn 0.4s ease-out forwards;
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* Выравнивание по вертикали */
+            align-items: center; /* Выравнивание по горизонтали */
+        }
+
+        .modal-content.special-effect {
+            animation: modalFadeIn 0.4s ease-out forwards, specialGlow 1.5s ease-in-out infinite alternate;
+            border-width: 5px;
+        }
+
+        /* Modal rarity borders */
+        .modal-content.common-win { border-color: #777; }
+        .modal-content.rare-win { border-color: #2980b9; }
+        .modal-content.epic-win { border-color: #8e44ad; }
+        .modal-content.legendary-win { border-color: #f39c12; }
+        .modal-content.mythic-win { border-color: #e74c3c; }
+        .modal-content.fantastic-win { border-color: #9b59b6; }
+
+        .modal-content h2 {
+            margin-top: 0; margin-bottom: 5px; /* Сокращаем отступ */
+            font-size: 1.8em;
+            font-weight: bold;
+            word-break: break-word; /* Добавлено и сюда на всякий случай */
+            text-align: center;
+        }
+
+        .modal-instruction {
+            font-size: 1em;
+            margin-bottom: 20px; color: #555;
+        }
+
+        .close-button {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #555;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: rgba(255, 255, 255, 0.6);
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.3);
+            z-index: 100; /* Ensure it's above the main content */
+            font-size: 0.9em;
+        }
+
+        footer a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        .footer-version {
+            display: block;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Испытай удачу, открой кейс (сайт сломан, скоро будет фикс)!</h1>
+
+    <div class="case-wrapper">
+        <div class="case-marker"></div>
+        <div class="case-container">
+            <div class="case-marker-line"></div>
+            <div class="case-items" id="caseItems">
+                <!-- Items will be added dynamically here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Контейнер для соглашения -->
+    <div class="agreement-container" id="agreementContainer">
+        <input type="checkbox" id="agreementCheckbox">
+        <label for="agreementCheckbox" id="agreementLabel">Я согласен с <a href="https://mixvineproject.github.io/politika" target="_blank">Политикой конфиденциальности</a> и <a href="https://mixvineproject.github.io/soglasie" target="_blank">Пользовательским соглашением</a></label>
+    </div>
+
+    <button id="openCaseButton" onclick="openCase()" disabled>Открыть кейс</button>
+
+    <div id="result"></div>
+    <div id="instructions">Нажмите "Открыть кейс", чтобы испытать удачу!</div>
+    <div id="bot-link"><a href="https://t.me/mixvinebot" target="_blank">Связаться с ботом MixVine</a></div>
+
+    <!-- HTML Модального Окна (единое) -->
+    <div id="winModal" class="modal">
+        <div class="modal-content" id="winModalContent">
+            <span class="close-button" id="winModalCloseButton">&times;</span>
+            <h2 id="winItemTitle"></h2>
+            <p id="winItemRarity"></p>
+        </div>
+    </div>
+
+    <footer>
+        <span>© 2024-2025 Project MixVine. Все права защищены.</span>
+        <br>
+        <a href="https://mixvineproject.github.io/politika" target="_blank">Политика конфиденциальности</a> | <a href="https://mixvineproject.github.io/soglasie" target="_blank">Пользовательское соглашение</a>
+        <span class="footer-version">ver. web3.1Global</span> <!-- Добавлена версия -->
+    </footer>
+
+    <script>
+        // --- КОНФИГУРАЦИЯ ---
+        const config = {
+            items: [
+                { display: "Rare Number #1", rarity: "rare", special: true },
+                { display: "Epic Number #2", rarity: "epic", special: true },
+                { display: "Legendary Number #3", rarity: "legendary", special: true },
+                { display: "Mythic Number #4", rarity: "mythic", special: true }, // Добавлен Mythic
+                { display: "Fantastic Number #5", rarity: "fantastic", special: true }, // Добавлен Fantastic
+                { display: "#1", rarity: "common" }, { display: "#2", rarity: "common" },
+                { display: "#3", rarity: "common" }, { display: "#4", rarity: "common" },
+                { display: "#5", rarity: "common" }, { display: "#6", rarity: "common" },
+                { display: "#7", rarity: "common" }, { display: "#8", rarity: "common" },
+                { display: "#9", rarity: "common" }, { display: "#10", rarity: "common" },
+                { display: "#11", rarity: "common" }, { display: "#12", rarity: "common" },
+                { display: "#13", rarity: "common" }, { display: "#14", rarity: "common" },
+                { display: "#15", rarity: "common" }, { display: "#16", rarity: "common" },
+                { display: "#17", rarity: "common" },
+                { display: "#18", rarity: "common" }, { display: "#19", rarity: "common" },
+                { display: "#20", rarity: "common" },
+            ],
+            numberOfDuplicates: 5,
+            spinDurationBase: 5,
+            spinsMultiplier: 0.5,
+            minSpins: 5,
+            maxSpins: 8
+        };
+        // --- КОНЕЦ КОНФИГУРАЦИИ ---
+
+        // Shuffle array function
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Optimize item creation by caching elements
+        function createItemElement(itemData) {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'case-item';
+            if (itemData.rarity) {
+                itemDiv.classList.add(itemData.rarity);
+            }
+            itemDiv.textContent = itemData.display;
+            return itemDiv;
+        }
+
+        const caseItemsContainer = document.getElementById('caseItems');
+        const openCaseButton = document.getElementById('openCaseButton');
+        const winModal = document.getElementById('winModal');
+        const winModalContent = document.getElementById('winModalContent');
+        const winItemTitle = document.getElementById('winItemTitle');
+        const winItemRarity = document.getElementById('winItemRarity'); // Получаем элемент для отображения редкости
+        const winModalCloseButton = document.getElementById('winModalCloseButton');
+        const agreementCheckbox = document.getElementById('agreementCheckbox');
+        const agreementContainer = document.getElementById('agreementContainer');
+
+        const numUniqueItems = config.items.length;
+
+        let isSpinning = false;
+        let itemWidth = 0; // Will be calculated
+        let itemsGenerated = false;
+
+        // Function to create item elements and calculate width
+        function setupItems() {
+            caseItemsContainer.innerHTML = ''; // Clear first
+            const fragment = document.createDocumentFragment();
+            const itemsToRender = [];
+
+            for (let d = 0; d <= config.numberOfDuplicates; d++) {
+                itemsToRender.push(...config.items);
+            }
+            shuffleArray(itemsToRender);
+
+            // Determine item width from CSS for the current screen size
+            let tempItemDiv = document.createElement('div');
+            tempItemDiv.classList.add('case-item');
+            tempItemDiv.style.visibility = 'hidden';
+            caseItemsContainer.appendChild(tempItemDiv);
+            itemWidth = tempItemDiv.offsetWidth;
+            caseItemsContainer.removeChild(tempItemDiv);
+
+            console.log("Item width calculated:", itemWidth);
+
+            if (itemWidth === 0) {
+                console.error("Could not determine item width! Using fallback.");
+                // Пытаемся получить ширину из CSS переменной или задать значение по умолчанию
+                const fallbackWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--case-item-width-fallback') || '100');
+                itemWidth = fallbackWidth;
+                console.warn("Using fallback width:", itemWidth);
+            }
+
+
+            // Now create the actual items
+            itemsToRender.forEach(itemData => {
+                const itemDiv = createItemElement(itemData);
+                fragment.appendChild(itemDiv);
+            });
+
+            caseItemsContainer.appendChild(fragment);
+            itemsGenerated = true;
+        }
+
+        // --- Показ модального окна ---
+        function showWinModal(item) {
+            winItemTitle.textContent = item.display;
+            winItemTitle.style.color = getRarityColorHex(item.rarity);
+            winItemTitle.style.textAlign = "center";
+
+            winModalContent.className = 'modal-content';
+            winModalContent.classList.add(item.rarity + '-win');
+
+            if (item.special) {
+                winModalContent.classList.add('special-effect');
+                console.log("Special win effect added for:", item.display);
+            }
+
+            // Добавляем отображение редкости
+            winItemRarity.textContent = `Редкость: ${item.rarity}`; // Выводим редкость
+            winItemRarity.style.color = "#555";
+            winItemRarity.style.textAlign = "center";
+            winItemRarity.style.marginBottom = "0";
+
+            winModal.style.display = "block";
+        }
+
+        // --- Закрытие модального окна ---
+        winModalCloseButton.onclick = function() {
+            winModal.style.display = "none";
+        }
+        window.onclick = function(event) {
+            if (event.target == winModal) {
+                winModal.style.display = "none";
+            }
+        }
+
+        // --- MAIN SPIN FUNCTION ---
+        function openCase() {
+            if (itemWidth === 0 && itemsGenerated) {
+                 let currentItemWidth = caseItemsContainer.children.length > 0 ? caseItemsContainer.children[0].offsetWidth : 0;
+                 if (currentItemWidth > 0) {
+                     itemWidth = currentItemWidth;
+                     console.log("Item width re-calculated:", itemWidth);
+                 }
+            }
+
+            if (isSpinning || !itemsGenerated || itemWidth === 0) {
+                console.warn("Spin prevented: Conditions not met.", {isSpinning, itemsGenerated, itemWidth});
+                return;
+            }
+
+            isSpinning = true;
+            openCaseButton.disabled = true;
+            openCaseButton.textContent = "Кейс открыт, для повторного открытия перезагрузите страницу";
+
+            // Remove the agreement elements
+            agreementContainer.style.display = 'none';
+
+
+            const winningIndexInUniqueSet = Math.floor(Math.random() * numUniqueItems);
+            const winningItem = config.items[winningIndexInUniqueSet];
+            console.log(`Winning item: #${winningIndexInUniqueSet + 1}`, winningItem);
+
+            let targetItemIndex = -1;
+            const startIndexToSearch = Math.floor(config.numberOfDuplicates / 2) * numUniqueItems;
+            const allRenderedItems = Array.from(caseItemsContainer.children);
+
+            for(let i = startIndexToSearch; i < allRenderedItems.length; i++) {
+                 const renderedItemText = allRenderedItems[i].textContent;
+                 const hasCorrectRarityClass = winningItem.rarity ? allRenderedItems[i].classList.contains(winningItem.rarity) : true;
+                if (renderedItemText === winningItem.display && hasCorrectRarityClass) {
+                    targetItemIndex = i;
+                    break;
+                }
+            }
+             if (targetItemIndex === -1) {
+                console.warn("Could not find exact winning item in duplicates, using original index logic.");
+                targetItemIndex = (config.numberOfDuplicates - 1) * numUniqueItems + winningIndexInUniqueSet;
+             }
+
+            const containerWidth = caseItemsContainer.parentElement.offsetWidth;
+            const centerOffset = (containerWidth / 2) - (itemWidth / 2);
+            let totalOffset = (targetItemIndex * itemWidth) - centerOffset;
+            const jitter = (Math.random() - 0.5) * (itemWidth * 0.1);
+            totalOffset += jitter;
+
+            const numSpins = config.minSpins + Math.floor(Math.random() * (config.maxSpins - config.minSpins + 1));
+            const duration = config.spinDurationBase + numSpins * config.spinsMultiplier;
+            console.log(`Calculated Spins: ${numSpins}, Duration: ${duration.toFixed(2)}s, Target Index: ${targetItemIndex}, Offset: ${totalOffset}`);
+
+            // Use requestAnimationFrame for smoother animation
+            requestAnimationFrame(() => {
+              caseItemsContainer.style.transition = `transform ${duration}s cubic-bezier(0.15, 0.8, 0.15, 1)`;
+              caseItemsContainer.style.transform = `translateX(-${totalOffset}px)`;
+            });
+
+            // --- Handle Spin End ---
+            setTimeout(() => {
+                isSpinning = false;
+                openCaseButton.textContent = "Кейс открыт, для повторного открытия перезагрузите страницу";
+                showWinModal(winningItem);
+                console.log("Spin finished.");
+            }, duration * 1000);
+        }
+
+        // Helper to get HEX color based on rarity
+        function getRarityColorHex(rarity) {
+            switch (rarity) {
+                case 'common': return '#aaaaaa';
+                case 'uncommon': return '#88cc88';
+                case 'rare': return '#5dade2';
+                case 'epic': return '#af7ac5';
+                case 'legendary': return '#f39c12';
+                case 'mythic': return '#e74c3c'; // Красный
+                case 'fantastic': return '#9b59b6'; // Цвет fantastic, можно заменить
+                default: return '#333333';
+            }
+        }
+
+        // --- Initialize ---
+        setupItems();
+
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+             clearTimeout(resizeTimeout);
+             resizeTimeout = setTimeout(() => {
+                 console.log("Window resized, recalculating item width...");
+                 if (caseItemsContainer.children.length > 0 && !isSpinning) {
+                    // Re-measure item width after styles might have changed
+                    let currentItemWidth = caseItemsContainer.children[0].offsetWidth;
+                     if (currentItemWidth > 0) {
+                        itemWidth = currentItemWidth;
+                        console.log("Item width recalculated on resize:", itemWidth);
+                     } else {
+                         console.warn("Could not measure item width on resize.");
+                     }
+                 } else if (!itemsGenerated) {
+                     setupItems();
+                 }
+             }, 250);
+         });
+
+        // Обработчик изменения состояния чекбокса
+        agreementCheckbox.addEventListener('change', function() {
+            openCaseButton.disabled = !this.checked;
+        });
+
+        // Сразу после загрузки скрипта проверяем, было ли согласие сохранено в localStorage
+        window.addEventListener('load', () => {
+            openCaseButton.disabled = !agreementCheckbox.checked;
+        });
+
+    </script>
+
+</body>
+</html>
